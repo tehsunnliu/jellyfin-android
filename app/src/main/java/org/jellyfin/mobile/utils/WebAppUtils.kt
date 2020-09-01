@@ -4,9 +4,18 @@ import android.content.Context
 import android.os.Build
 import android.webkit.WebResourceError
 import android.webkit.WebResourceResponse
+import androidx.annotation.WorkerThread
+import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.IOException
+
+@WorkerThread
+fun OkHttpClient.getRedirectLocation(url: HttpUrl): String? {
+    val client = newBuilder().followRedirects(false).build()
+    val response = client.newCall(Request.Builder().url(url).build()).execute()
+    return if (response.isRedirect) response.header("Location") else null
+}
 
 fun Context.loadPatchedIndex(httpClient: OkHttpClient, url: String): WebResourceResponse? = try {
     val result = StringBuilder()

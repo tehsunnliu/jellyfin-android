@@ -10,7 +10,8 @@ object Constants {
 
     // Webapp constants
     const val INDEX_PATCH_PATH = "index_patch.html"
-    const val INDEX_PATH = "web/index.html"
+    const val DEFAULT_INDEX_PATH = "web/index.html"
+    const val SELECT_SERVER_PATH = "selectserver.html"
     const val SERVER_INFO_PATH = "system/info/public"
 
     // Preference keys

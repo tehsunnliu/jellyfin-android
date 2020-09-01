@@ -23,11 +23,12 @@ import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.jellyfin.mobile.AppPreferences
-import org.jellyfin.mobile.R
 import org.jellyfin.mobile.MainActivity
+import org.jellyfin.mobile.R
 import org.jellyfin.mobile.databinding.ConnectServerBinding
 import org.jellyfin.mobile.utils.Constants
 import org.jellyfin.mobile.utils.Constants.SERVER_INFO_PATH
+import org.jellyfin.mobile.utils.getRedirectLocation
 import org.jellyfin.mobile.utils.requestNoBatteryOptimizations
 import org.json.JSONException
 import org.json.JSONObject
@@ -40,6 +41,8 @@ class ConnectionHelper(private val activity: MainActivity) {
     private val webView: WebView get() = activity.webView
 
     private var cachedInstanceUrl: HttpUrl? = null
+    var indexPath: String = Constants.DEFAULT_INDEX_PATH
+        private set
     var connected = false
         private set
 
@@ -86,7 +89,7 @@ class ConnectionHelper(private val activity: MainActivity) {
         cachedInstanceUrl.let { url ->
             if (url != null) {
                 webView.isVisible = true
-                webView.loadUrl(url.resolve(Constants.INDEX_PATH).toString())
+                webView.loadUrl(url.resolve(indexPath).toString())
             } else {
                 webView.isVisible = false
                 showServerSetup()
@@ -127,6 +130,9 @@ class ConnectionHelper(private val activity: MainActivity) {
         activity.lifecycleScope.launch {
             val httpUrl = checkServerUrlAndConnection(hostInput.text.toString())
             if (httpUrl != null) {
+                indexPath = withContext(Dispatchers.IO) {
+                    activity.httpClient.getRedirectLocation(httpUrl) ?: Constants.DEFAULT_INDEX_PATH
+                }
                 appPreferences.instanceUrl = httpUrl.toString()
                 cachedInstanceUrl = httpUrl
                 rootView.removeView(serverSetupLayout)

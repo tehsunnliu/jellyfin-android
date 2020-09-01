@@ -118,7 +118,7 @@ class MainActivity : AppCompatActivity(), WebViewController {
                 val url = request.url
                 val path = url.path ?: return null
                 return when {
-                    path.endsWith(Constants.INDEX_PATH) -> {
+                    path.endsWith(connectionHelper.indexPath) -> {
                         val patchedIndex = loadPatchedIndex(httpClient, url.toString())
                         if (patchedIndex != null) {
                             runOnUiThread { connectionHelper.onConnectedToWebapp() }
@@ -129,7 +129,7 @@ class MainActivity : AppCompatActivity(), WebViewController {
                         }
                     }
                     path.contains("native") -> loadAsset("native/${url.lastPathSegment}")
-                    path.endsWith("web/selectserver.html") -> {
+                    path.endsWith(Constants.SELECT_SERVER_PATH) -> {
                         runOnUiThread { connectionHelper.onSelectServer() }
                         emptyResponse
                     }
@@ -140,7 +140,7 @@ class MainActivity : AppCompatActivity(), WebViewController {
             override fun onReceivedHttpError(view: WebView, request: WebResourceRequest, errorResponse: WebResourceResponse) {
                 val errorMessage = errorResponse.data?.run { bufferedReader().use(Reader::readText) }
                 Timber.e("Received WebView HTTP %d error: %s", errorResponse.statusCode, errorMessage)
-                if (request.url.path?.endsWith(Constants.INDEX_PATH) != false)
+                if (request.url.path?.endsWith(connectionHelper.indexPath) != false)
                     runOnUiThread { connectionHelper.onErrorReceived() }
             }
 
